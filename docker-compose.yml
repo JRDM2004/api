@@ -133,6 +133,7 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html:cached
+      - vendor-data:/var/www/html/vendor
     environment:
       <<: *app-env
     depends_on:
