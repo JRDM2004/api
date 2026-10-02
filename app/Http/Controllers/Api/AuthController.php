@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UsuarioResource;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -36,6 +37,19 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'expires_at' => $expiraEn->toIso8601String(),
             'user' => new UsuarioResource($usuario),
+        ]);
+    }
+
+    /**
+     * Revoca solo el token con el que se hizo la peticion, asi que las
+     * sesiones en otros dispositivos siguen abiertas.
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Sesión cerrada.',
         ]);
     }
 }
