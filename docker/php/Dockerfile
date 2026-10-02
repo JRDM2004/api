@@ -103,6 +103,9 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS linux-headers \
 
 COPY docker/php/xdebug.ini /usr/local/etc/php/conf.d/99-xdebug.ini
 
+RUN printf "opcache.validate_timestamps=1\nopcache.revalidate_freq=0\n" \
+    > /usr/local/etc/php/conf.d/zz-opcache-dev.ini
+
 COPY --from=vendor /usr/bin/composer /usr/bin/composer
 
 USER laravel

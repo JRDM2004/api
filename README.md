@@ -1,58 +1,122 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="public/logo-aula-uas.png" width="40%" alt="Logo de Aula UAS">
 </p>
 
-## About Laravel
+# Aula UAS — API del LMS de la Facultad de Informática Culiacán
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+API REST del sistema de gestión del aprendizaje (LMS) de la Facultad de Informática Culiacán de la UAS. Atiende a la aplicación web y a la aplicación móvil: inicio de sesión por número de cuenta y NIP, usuarios, cursos, contenido, asistencia, tareas, calificaciones y exámenes.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tabla de contenidos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. [Tecnologías empleadas](#tecnologías-empleadas)
+2. [Manual de instalación](#manual-de-instalación)
+   - [Requisitos](#requisitos)
+   - [Instalación paso a paso](#instalación-paso-a-paso)
+   - [Usuarios de prueba](#usuarios-de-prueba)
+   - [Pruebas automáticas](#pruebas-automáticas)
 
-## Learning Laravel
+## Tecnologías empleadas
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Tecnología | Versión | Uso |
+|---|---|---|
+| PHP | 8.4 | Lenguaje de la API |
+| Laravel | 13 | Framework de la API |
+| Laravel Sanctum | 4 | Autenticación por token (`Authorization: Bearer ...`) |
+| PostgreSQL | 16 | Base de datos principal (usuarios, cursos, actividades, calificaciones, asistencia) |
+| MongoDB | 7 | Contenido de los cursos, preguntas y respuestas de exámenes, y bitácora |
+| Redis | 7 | Caché, colas de trabajos en segundo plano y contadores |
+| Nginx | 1.27 | Servidor web que atiende las peticiones y las pasa a PHP |
+| Mailpit | — | Buzón de correo de pruebas en desarrollo |
+| PHPUnit | 12 | Pruebas automáticas |
+| Docker y Docker Compose | — | Entorno de desarrollo con todos los servicios |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Los servicios corren en estos contenedores:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+| Contenedor | Servicio | Puerto en tu equipo |
+|---|---|---|
+| `taller_nginx` | Nginx (entrada de la API) | `8000` |
+| `taller_app` | PHP-FPM con Laravel | — |
+| `taller_queue` | Procesador de la cola de trabajos | — |
+| `taller_db` | PostgreSQL | `5432` |
+| `taller_mongo` | MongoDB | `27017` |
+| `taller_redis` | Redis | — |
+| `taller_mailpit` | Mailpit (interfaz web) | `8025` |
 
-## Agentic Development
+## Manual de instalación
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (incluye Docker Compose)
+- Git
+
+No hace falta instalar PHP, Composer ni las bases de datos en tu equipo: todo corre dentro de Docker.
+
+### Instalación paso a paso
+
+**1. Clonar el repositorio**
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/JRDM2004/api.git
+cd api
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+**2. Crear el archivo de configuración**
 
-## Contributing
+```bash
+cp .env.example .env
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Ajusta en `.env` el nombre, usuario y contraseña de la base de datos (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) si quieres usar otros. El archivo `.env` nunca se sube al repositorio.
 
-## Code of Conduct
+**3. Construir y levantar los contenedores**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+docker compose up -d --build
+```
 
-## Security Vulnerabilities
+La primera vez tarda varios minutos porque construye la imagen de PHP.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**4. Instalar las dependencias de PHP**
 
-## License
+```bash
+docker compose exec app composer install
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**5. Generar la llave de la aplicación**
+
+```bash
+docker compose exec app php artisan key:generate
+```
+
+**6. Crear las tablas y cargar los usuarios de prueba**
+
+```bash
+docker compose exec app php artisan migrate --seed
+```
+
+**7. Comprobar que funciona**
+
+```bash
+curl http://localhost:8000/up
+```
+
+Debe responder con código 200. La API queda disponible en `http://localhost:8000/api`.
+
+### Usuarios de prueba
+
+El paso 6 crea estos usuarios (solo para desarrollo):
+
+| Número de cuenta | Rol | NIP | Estado |
+|---|---|---|---|
+| `00000001` | administrador | `ADF001` | activo |
+| `00000002` | docente | `D0CE01` | activo |
+| `00000003` | alumno | `A1B2C3` | activo |
+| `00000004` | alumno | `A1B2C3` | inactivo |
+
+### Pruebas automáticas
+
+```bash
+docker compose exec app php artisan test
+```
+
+Las pruebas usan una base de datos SQLite en memoria y caché en memoria, así que **no modifican** la base de datos ni el Redis de desarrollo.
