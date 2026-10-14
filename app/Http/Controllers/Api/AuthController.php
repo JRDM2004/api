@@ -41,6 +41,17 @@ class AuthController extends Controller
     }
 
     /**
+     * Devuelve los datos del usuario de la sesión, para que web y móvil sepan
+     * qué menú y pantallas mostrar según su rol.
+     */
+    public function me(Request $request): JsonResponse
+    {
+        return response()->json([
+            'user' => new UsuarioResource($request->user()),
+        ]);
+    }
+
+    /**
      * Revoca solo el token con el que se hizo la peticion, asi que las
      * sesiones en otros dispositivos siguen abiertas.
      */
