@@ -17,9 +17,13 @@ class VerificarRol
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        $permitidos = array_map(fn (string $rol) => Rol::from($rol), $roles);
+        $permitidos = [];
 
-        if (! in_array($request->user()?->rol, $permitidos, true)) {
+        foreach ($roles as $rol) {
+            $permitidos[] = Rol::from($rol);
+        }
+
+        if (! in_array($request->user()->rol, $permitidos, true)) {
             abort(403, 'No tienes permiso para realizar esta acción.');
         }
 
