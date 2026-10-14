@@ -85,6 +85,9 @@ class ImportadorUsuarios
 
         $datos = array_combine(self::ENCABEZADOS, array_map('trim', $fila));
 
+        // ! El login pasa el NIP a mayúsculas (LoginRequest): si se guarda en minúsculas, nunca coincide
+        $datos['nip'] = strtoupper($datos['nip']);
+
         // * Se revisa antes de validar: una cuenta existente se omite aunque su fila tenga otro error
         if (Usuario::where('numero_cuenta', $datos['numero_cuenta'])->exists()) {
             $this->reporte['omitidos']++;
