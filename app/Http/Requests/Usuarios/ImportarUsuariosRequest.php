@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests\Usuarios;
 
-use App\Enums\Rol;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -11,15 +9,9 @@ class ImportarUsuariosRequest extends FormRequest
 {
     public const TAMANO_MAXIMO_KB = 2048;
 
-    // TODO: HU-03 cambiar esta revisión por el middleware de roles
     public function authorize(): bool
     {
-        return $this->user()?->rol === Rol::Administrador;
-    }
-
-    protected function failedAuthorization(): void
-    {
-        throw new AuthorizationException('Solo el administrador puede importar usuarios.');
+        return true;
     }
 
     /**

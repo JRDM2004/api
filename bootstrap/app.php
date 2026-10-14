@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\VerificarRol;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -18,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(
             fn (Request $request) => $request->is('api/*') ? null : '/',
         );
+
+        // Nombre corto para usarlo en las rutas: ->middleware('rol:administrador').
+        $middleware->alias([
+            'rol' => VerificarRol::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
