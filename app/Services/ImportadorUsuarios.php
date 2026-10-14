@@ -10,11 +10,10 @@ use Illuminate\Validation\Rule;
 use RuntimeException;
 
 /**
- * Importa usuarios desde un archivo CSV con las columnas
- * numero_cuenta, nombre, rol, nip y correo (opcional).
+ * Crea usuarios a partir de un archivo CSV.
  *
- * Una fila con error no detiene la importación, y los números de cuenta que
- * ya existen se omiten, así que el mismo archivo se puede procesar varias veces.
+ * Si una fila tiene un error, sigue con las demás. Si el número de cuenta ya
+ * existe, salta la fila, así que subir el mismo archivo dos veces no duplica.
  */
 class ImportadorUsuarios
 {
@@ -23,7 +22,7 @@ class ImportadorUsuarios
     private array $reporte;
 
     /**
-     * Devuelve el reporte: creados, omitidos y errores (con su número de línea).
+     * Devuelve cuántos se crearon, cuántos se saltaron y los errores por línea.
      */
     public function importar(string $ruta): array
     {
@@ -35,7 +34,7 @@ class ImportadorUsuarios
 
         $archivo = fopen($ruta, 'r');
 
-        // * escape: '' sigue el estándar CSV (RFC 4180), que es como Excel escapa las comillas: ""
+        // Lee las comillas igual que Excel.
         $encabezados = fgetcsv($archivo, escape: '');
 
         if (! $this->encabezadosValidos($encabezados)) {
@@ -50,7 +49,7 @@ class ImportadorUsuarios
         while (($fila = fgetcsv($archivo, escape: '')) !== false) {
             $linea++;
 
-            // Excel suele dejar renglones vacíos al final del archivo.
+            // Salta los renglones vacíos.
             if ($fila === [null]) {
                 continue;
             }
@@ -69,7 +68,7 @@ class ImportadorUsuarios
             return false;
         }
 
-        // Excel agrega una marca invisible (BOM) al inicio de los CSV en UTF-8.
+        // Quita un basura que Excel pone al inicio del archivo.
         $encabezados[0] = preg_replace('/^\xEF\xBB\xBF/', '', $encabezados[0]);
 
         return array_map('trim', $encabezados) === self::ENCABEZADOS;
@@ -85,10 +84,10 @@ class ImportadorUsuarios
 
         $datos = array_combine(self::ENCABEZADOS, array_map('trim', $fila));
 
-        // ! El login pasa el NIP a mayúsculas (LoginRequest): si se guarda en minúsculas, nunca coincide
+        // ! El login usa el NIP en mayúsculas, así que se guarda igual
         $datos['nip'] = strtoupper($datos['nip']);
 
-        // * Se revisa antes de validar: una cuenta existente se omite aunque su fila tenga otro error
+        // Si la cuenta ya existe, se salta la fila.
         if (Usuario::where('numero_cuenta', $datos['numero_cuenta'])->exists()) {
             $this->reporte['omitidos']++;
 
