@@ -13,6 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // * Gestión de usuarios: solo el administrador.
     Route::middleware('rol:administrador')->group(function () {
+        Route::get('/usuarios', [UsuarioController::class, 'index']);
         Route::post('/usuarios', [UsuarioController::class, 'store']);
         Route::post('/usuarios/importaciones', [ImportacionUsuariosController::class, 'store']);
         Route::get('/usuarios/importaciones/{id}', [ImportacionUsuariosController::class, 'show']);
