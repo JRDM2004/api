@@ -7,9 +7,22 @@ use App\Http\Requests\Usuarios\RegistrarUsuarioRequest;
 use App\Http\Resources\UsuarioResource;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class UsuarioController extends Controller
 {
+    public const USUARIOS_POR_PAGINA = 15;
+
+    /**
+     * Lista los usuarios por páginas, ordenados por nombre.
+     */
+    public function index(): AnonymousResourceCollection
+    {
+        $usuarios = Usuario::orderBy('nombre')->paginate(self::USUARIOS_POR_PAGINA);
+
+        return UsuarioResource::collection($usuarios);
+    }
+
     /**
      * Registra un usuario. Queda activo y puede iniciar sesión de inmediato.
      */
