@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Usuarios;
 
+use App\Rules\Nip;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -20,7 +21,7 @@ class RestablecerNipRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nip' => ['required', 'string'],
+            'nip' => ['required', new Nip],
         ];
     }
 
@@ -31,7 +32,6 @@ class RestablecerNipRequest extends FormRequest
     {
         return [
             'nip.required' => 'El NIP es obligatorio.',
-            'nip.string' => 'El NIP no es válido.',
         ];
     }
 }
