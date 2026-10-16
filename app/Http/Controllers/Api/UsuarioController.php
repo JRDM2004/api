@@ -124,6 +124,9 @@ class UsuarioController extends Controller
         // * El cast "hashed" del modelo lo guarda con hash
         $usuario->update(['nip_hash' => $request->nip]);
 
+        // * Se cierran sus sesiones abiertas para que tenga que entrar con el NIP nuevo.
+        $usuario->tokens()->delete();
+
         // ! Nunca devolver el NIP en la respuesta
         return response()->json([
             'message' => 'NIP restablecido.',
