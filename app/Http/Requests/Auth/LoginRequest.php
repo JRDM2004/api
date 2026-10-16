@@ -21,7 +21,8 @@ class LoginRequest extends FormRequest
     {
         $this->merge([
             'numero_cuenta' => trim((string) $this->numero_cuenta),
-            'nip' => strtoupper(trim((string) $this->nip)),
+            // ! El NIP distingue mayúsculas y minúsculas: no cambiarlas aquí
+            'nip' => trim((string) $this->nip),
         ]);
     }
 

@@ -7,9 +7,12 @@ use App\Http\Requests\Usuarios\ActualizarUsuarioRequest;
 use App\Http\Requests\Usuarios\CambiarEstadoUsuarioRequest;
 use App\Http\Requests\Usuarios\ConsultarUsuariosRequest;
 use App\Http\Requests\Usuarios\RegistrarUsuarioRequest;
+use App\Http\Requests\Usuarios\RestablecerNipRequest;
 use App\Http\Resources\UsuarioResource;
+use App\Models\Bitacora;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class UsuarioController extends Controller
@@ -111,6 +114,29 @@ class UsuarioController extends Controller
 
         return response()->json([
             'message' => $mensaje,
+            'user' => new UsuarioResource($usuario),
+        ]);
+    }
+
+    /**
+     * Le asigna un NIP nuevo al usuario, para cuando olvida el suyo.
+     */
+    public function restablecerNip(RestablecerNipRequest $request, Usuario $usuario): JsonResponse
+    {
+        // * Las tres cosas se guardan juntas: si una falla, no se guarda ninguna.
+        DB::transaction(function () use ($request, $usuario) {
+            // * El cast "hashed" del modelo lo guarda con hash
+            $usuario->update(['nip_hash' => $request->nip]);
+
+            // * Se cierran sus sesiones abiertas para que tenga que entrar con el NIP nuevo.
+            $usuario->tokens()->delete();
+
+            Bitacora::registrar($request->user(), Bitacora::NIP_RESTABLECIDO, $usuario);
+        });
+
+        // ! Nunca devolver el NIP en la respuesta
+        return response()->json([
+            'message' => 'NIP restablecido.',
             'user' => new UsuarioResource($usuario),
         ]);
     }
