@@ -9,7 +9,8 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/mi-perfil', [AuthController::class, 'miPerfil']);
+    Route::post('/cambiar-nip', [AuthController::class, 'cambiarNip']);
 
     // * Gestión de usuarios: solo el administrador.
     Route::middleware('rol:administrador')->group(function () {
