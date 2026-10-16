@@ -7,6 +7,7 @@ use App\Http\Requests\Usuarios\ActualizarUsuarioRequest;
 use App\Http\Requests\Usuarios\CambiarEstadoUsuarioRequest;
 use App\Http\Requests\Usuarios\ConsultarUsuariosRequest;
 use App\Http\Requests\Usuarios\RegistrarUsuarioRequest;
+use App\Http\Requests\Usuarios\RestablecerNipRequest;
 use App\Http\Resources\UsuarioResource;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
@@ -111,6 +112,21 @@ class UsuarioController extends Controller
 
         return response()->json([
             'message' => $mensaje,
+            'user' => new UsuarioResource($usuario),
+        ]);
+    }
+
+    /**
+     * Le asigna un NIP nuevo al usuario, para cuando olvida el suyo.
+     */
+    public function restablecerNip(RestablecerNipRequest $request, Usuario $usuario): JsonResponse
+    {
+        // * El cast "hashed" del modelo lo guarda con hash
+        $usuario->update(['nip_hash' => $request->nip]);
+
+        // ! Nunca devolver el NIP en la respuesta
+        return response()->json([
+            'message' => 'NIP restablecido.',
             'user' => new UsuarioResource($usuario),
         ]);
     }

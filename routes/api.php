@@ -17,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/usuarios', [UsuarioController::class, 'store']);
         Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update']);
         Route::patch('/usuarios/{usuario}/estado', [UsuarioController::class, 'cambiarEstado']);
+        Route::post('/usuarios/{usuario}/restablecer-nip', [UsuarioController::class, 'restablecerNip']);
         Route::post('/usuarios/importaciones', [ImportacionUsuariosController::class, 'store']);
         Route::get('/usuarios/importaciones/{id}', [ImportacionUsuariosController::class, 'show']);
     });
