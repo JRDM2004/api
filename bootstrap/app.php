@@ -35,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Tu sesión no es valida o expiro. Inicia sesión de nuevo.',
+                    'message' => 'Tu sesión no es válida o expiró. Inicia sesión de nuevo.',
                 ], 401);
             }
         });

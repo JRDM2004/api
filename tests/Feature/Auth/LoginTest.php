@@ -36,14 +36,17 @@ class LoginTest extends TestCase
         $this->assertDatabaseCount('personal_access_tokens', 1);
     }
 
-    public function test_acepta_el_nip_en_minusculas(): void
+    public function test_rechaza_el_nip_en_minusculas(): void
     {
         $usuario = Usuario::factory()->create();
 
         $this->postJson('/api/login', [
             'numero_cuenta' => $usuario->numero_cuenta,
             'nip' => strtolower(UsuarioFactory::NIP),
-        ])->assertOk();
+        ])->assertUnauthorized()
+            ->assertJsonPath('message', 'Número de cuenta o NIP incorrectos.');
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 
     public function test_nip_incorrecto_y_cuenta_inexistente_dan_el_mismo_mensaje(): void
