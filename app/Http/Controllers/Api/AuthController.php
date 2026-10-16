@@ -11,9 +11,55 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
+    #[OA\Post(
+        path: '/api/login',
+        summary: 'Iniciar sesión',
+        description: 'Devuelve un token para las demás rutas. El NIP distingue mayúsculas y minúsculas.',
+        tags: ['Autenticación'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['numero_cuenta', 'nip'],
+                properties: [
+                    new OA\Property(property: 'numero_cuenta', type: 'string', maxLength: 20, example: '20231234'),
+                    new OA\Property(property: 'nip', type: 'string', maxLength: 50, example: 'Abc123'),
+                ],
+            ),
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Sesión iniciada',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'token', type: 'string', example: '12|Xk9pR2...'),
+                        new OA\Property(property: 'token_type', type: 'string', example: 'Bearer'),
+                        new OA\Property(property: 'expires_at', type: 'string', format: 'date-time'),
+                        new OA\Property(property: 'user', ref: '#/components/schemas/Usuario'),
+                    ],
+                ),
+            ),
+            new OA\Response(
+                response: 401,
+                description: 'Número de cuenta o NIP incorrectos (no dice cuál falló)',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorMensaje'),
+            ),
+            new OA\Response(
+                response: 403,
+                description: 'La cuenta está desactivada',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorMensaje'),
+            ),
+            new OA\Response(
+                response: 422,
+                description: 'Faltan datos',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion'),
+            ),
+        ],
+    )]
     public function login(LoginRequest $request): JsonResponse
     {
         $usuario = Usuario::where('numero_cuenta', $request->numero_cuenta)->first();
