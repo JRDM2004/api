@@ -41,10 +41,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Devuelve los datos del usuario de la sesión, para que web y móvil sepan
-     * qué menú y pantallas mostrar según su rol.
+     * Devuelve el perfil del usuario de la sesión.
+     *
+     * * Solo da el perfil propio: no recibe id, usa el usuario del token.
      */
-    public function me(Request $request): JsonResponse
+    public function miPerfil(Request $request): JsonResponse
     {
         return response()->json([
             'user' => new UsuarioResource($request->user()),
