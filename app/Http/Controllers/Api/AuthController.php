@@ -93,6 +93,25 @@ class AuthController extends Controller
      *
      * * Solo da el perfil propio: no recibe id, usa el usuario del token.
      */
+    #[OA\Get(
+        path: '/api/mi-perfil',
+        summary: 'Ver mi perfil',
+        description: 'Datos del usuario dueño del token. Web y móvil también lo usan para saber qué menú mostrar.',
+        tags: ['Autenticación'],
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Perfil del usuario',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'user', ref: '#/components/schemas/Usuario'),
+                    ],
+                ),
+            ),
+            new OA\Response(ref: '#/components/responses/NoAutenticado', response: 401),
+        ],
+    )]
     public function miPerfil(Request $request): JsonResponse
     {
         return response()->json([
@@ -103,6 +122,45 @@ class AuthController extends Controller
     /**
      * Cambia el NIP del usuario de la sesión. Pide el NIP actual.
      */
+    #[OA\Post(
+        path: '/api/cambiar-nip',
+        summary: 'Cambiar mi NIP',
+        description: 'Pide el NIP actual y el nuevo dos veces. Cierra las demás sesiones del usuario; '
+            .'la de este dispositivo sigue abierta.',
+        tags: ['Autenticación'],
+        security: [['sanctum' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['nip_actual', 'nip', 'nip_confirmation'],
+                properties: [
+                    new OA\Property(property: 'nip_actual', type: 'string', example: 'Abc123'),
+                    new OA\Property(
+                        property: 'nip',
+                        type: 'string',
+                        description: 'De 4 a 6 letras o números, distinto al actual. Distingue mayúsculas.',
+                        minLength: 4,
+                        maxLength: 6,
+                        pattern: '^[A-Za-z0-9]{4,6}$',
+                        example: 'Nuevo9',
+                    ),
+                    new OA\Property(property: 'nip_confirmation', type: 'string', description: 'Igual a nip.', example: 'Nuevo9'),
+                ],
+            ),
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'NIP cambiado',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/Mensaje',
+                    example: ['message' => 'NIP actualizado.'],
+                ),
+            ),
+            new OA\Response(ref: '#/components/responses/NoAutenticado', response: 401),
+            new OA\Response(ref: '#/components/responses/DatosInvalidos', response: 422),
+        ],
+    )]
     public function cambiarNip(CambiarNipRequest $request): JsonResponse
     {
         $usuario = $request->user();
@@ -126,6 +184,24 @@ class AuthController extends Controller
      * Revoca solo el token con el que se hizo la peticion, asi que las
      * sesiones en otros dispositivos siguen abiertas.
      */
+    #[OA\Post(
+        path: '/api/logout',
+        summary: 'Cerrar sesión',
+        description: 'Revoca solo el token de esta petición; las sesiones de otros dispositivos siguen abiertas.',
+        tags: ['Autenticación'],
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Sesión cerrada',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/Mensaje',
+                    example: ['message' => 'Sesión cerrada.'],
+                ),
+            ),
+            new OA\Response(ref: '#/components/responses/NoAutenticado', response: 401),
+        ],
+    )]
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();

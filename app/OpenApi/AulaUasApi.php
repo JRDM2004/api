@@ -27,6 +27,14 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Autenticación', description: 'Inicio de sesión, perfil y NIP propio')]
 #[OA\Tag(name: 'Usuarios', description: 'Gestión de usuarios (solo administrador)')]
 #[OA\Tag(name: 'Importaciones', description: 'Carga masiva de usuarios con CSV (solo administrador)')]
+#[OA\Schema(
+    schema: 'Mensaje',
+    description: 'Respuesta de éxito que solo trae un mensaje.',
+    required: ['message'],
+    properties: [
+        new OA\Property(property: 'message', type: 'string', example: 'Sesión cerrada.'),
+    ],
+)]
 // Respuestas de error que se repiten en varios endpoints.
 #[OA\Schema(
     schema: 'ErrorMensaje',
@@ -48,6 +56,33 @@ use OpenApi\Attributes as OA;
             example: ['nip' => ['El NIP es obligatorio.']],
         ),
     ],
+)]
+// Respuestas que se repiten: cada endpoint las usa con ref.
+#[OA\Response(
+    response: 'NoAutenticado',
+    description: 'Sin token, o el token venció o fue revocado',
+    content: new OA\JsonContent(
+        ref: '#/components/schemas/ErrorMensaje',
+        example: ['message' => 'Tu sesión no es valida o expiro. Inicia sesión de nuevo.'],
+    ),
+)]
+#[OA\Response(
+    response: 'SinPermiso',
+    description: 'El rol del usuario no tiene permiso',
+    content: new OA\JsonContent(ref: '#/components/schemas/ErrorMensaje'),
+)]
+#[OA\Response(
+    response: 'NoEncontrado',
+    description: 'El registro o la ruta no existe',
+    content: new OA\JsonContent(
+        ref: '#/components/schemas/ErrorMensaje',
+        example: ['message' => 'No se encontró el recurso.'],
+    ),
+)]
+#[OA\Response(
+    response: 'DatosInvalidos',
+    description: 'Los datos enviados no pasan la validación',
+    content: new OA\JsonContent(ref: '#/components/schemas/ErrorValidacion'),
 )]
 class AulaUasApi
 {
