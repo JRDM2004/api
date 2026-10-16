@@ -4,7 +4,7 @@
 
 # Aula UAS — API del LMS de la Facultad de Informática Culiacán
 
-API REST del sistema de gestión del aprendizaje (LMS) de la Facultad de Informática Culiacán de la UAS. Atiende a la aplicación web y a la aplicación móvil: inicio de sesión por número de cuenta y NIP, usuarios, cursos, contenido, asistencia, tareas, calificaciones y exámenes.
+API REST del sistema de gestión del aprendizaje (LMS) de la Facultad de Informática Culiacán de la UAS. Atiende a la aplicación web y a la aplicación móvil. Hoy cubre el inicio de sesión por número de cuenta y NIP y la gestión de usuarios; en el MVP se cubrirán también cursos, contenido, asistencia, tareas, calificaciones y exámenes.
 
 ## Tabla de contenidos
 
@@ -13,7 +13,7 @@ API REST del sistema de gestión del aprendizaje (LMS) de la Facultad de Inform�
    - [Requisitos](#requisitos)
    - [Instalación paso a paso](#instalación-paso-a-paso)
    - [Usuarios de prueba](#usuarios-de-prueba)
-   - [Pruebas automáticas](#pruebas-automáticas)
+3. [Documentación de la API](#documentación-de-la-api)
 
 ## Tecnologías empleadas
 
@@ -63,10 +63,10 @@ cd api
 **2. Crear el archivo de configuración**
 
 ```bash
-cp .env.example .env
+copy .env.example .env
 ```
 
-Ajusta en `.env` el nombre, usuario y contraseña de la base de datos (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) si quieres usar otros. El archivo `.env` nunca se sube al repositorio.
+Ajusta en `.env` el nombre, usuario y contraseña de la base de datos (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) si quieres usar otros.
 
 **3. Construir y levantar los contenedores**
 
@@ -94,7 +94,15 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-**7. Comprobar que funciona**
+**7. Generar la documentación de la API**
+
+```bash
+docker compose exec app php artisan l5-swagger:generate
+```
+
+La documentación no se guarda en el repositorio, por eso hay que generarla. Repite este paso cuando cambien los endpoints.
+
+**8. Comprobar que funciona**
 
 ```bash
 curl http://localhost:8000/up
@@ -113,10 +121,12 @@ El paso 6 crea estos usuarios (solo para desarrollo):
 | `00000003` | alumno | `A1B2C3` | activo |
 | `00000004` | alumno | `A1B2C3` | inactivo |
 
-### Pruebas automáticas
+## Documentación de la API
 
-```bash
-docker compose exec app php artisan test
+Con los contenedores levantados, la documentación de todos los endpoints está en Swagger:
+
+```
+http://localhost:8000/api/documentation
 ```
 
-Las pruebas usan una base de datos SQLite en memoria y caché en memoria, así que **no modifican** la base de datos ni el Redis de desarrollo.
+Para importar usuarios por CSV, consulta la [guía de importación](docs/usuarios/importar_usuarios.md).

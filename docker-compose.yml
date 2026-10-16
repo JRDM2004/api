@@ -18,6 +18,9 @@ x-app-env: &app-env
   CACHE_STORE: redis
   SESSION_DRIVER: redis
   QUEUE_CONNECTION: redis
+  # Más que el tiempo máximo de la importación de usuarios (900 s), para que no se repita.
+  REDIS_QUEUE_RETRY_AFTER: 960
+  L5_SWAGGER_GENERATE_ALWAYS: ${L5_SWAGGER_GENERATE_ALWAYS:-true}
 
 services:
   app:
