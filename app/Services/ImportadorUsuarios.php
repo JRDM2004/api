@@ -84,9 +84,6 @@ class ImportadorUsuarios
 
         $datos = array_combine(self::ENCABEZADOS, array_map('trim', $fila));
 
-        // ! El login usa el NIP en mayúsculas, así que se guarda igual
-        $datos['nip'] = strtoupper($datos['nip']);
-
         // Si la cuenta ya existe, se salta la fila.
         if (Usuario::where('numero_cuenta', $datos['numero_cuenta'])->exists()) {
             $this->reporte['omitidos']++;

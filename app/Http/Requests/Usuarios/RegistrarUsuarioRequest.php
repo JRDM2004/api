@@ -16,17 +16,6 @@ class RegistrarUsuarioRequest extends FormRequest
     }
 
     /**
-     * Prepare the data for validation.
-     */
-    protected function prepareForValidation(): void
-    {
-        // ! El login usa el NIP en mayúsculas, así que se guarda igual
-        $this->merge([
-            'nip' => strtoupper((string) $this->nip),
-        ]);
-    }
-
-    /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
