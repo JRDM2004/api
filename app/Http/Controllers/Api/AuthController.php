@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\CambiarNipRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UsuarioResource;
 use App\Models\Usuario;
@@ -49,6 +50,19 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => new UsuarioResource($request->user()),
+        ]);
+    }
+
+    /**
+     * Cambia el NIP del usuario de la sesión. Pide el NIP actual.
+     */
+    public function cambiarNip(CambiarNipRequest $request): JsonResponse
+    {
+        // * El cast "hashed" del modelo lo guarda con hash
+        $request->user()->update(['nip_hash' => $request->nip]);
+
+        return response()->json([
+            'message' => 'NIP actualizado.',
         ]);
     }
 
