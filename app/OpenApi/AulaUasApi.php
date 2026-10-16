@@ -107,7 +107,7 @@ use OpenApi\Attributes as OA;
     description: 'Sin token, o el token venció o fue revocado',
     content: new OA\JsonContent(
         ref: '#/components/schemas/ErrorMensaje',
-        example: ['message' => 'Tu sesión no es valida o expiro. Inicia sesión de nuevo.'],
+        example: ['message' => 'Tu sesión no es válida o expiró. Inicia sesión de nuevo.'],
     ),
 )]
 #[OA\Response(
