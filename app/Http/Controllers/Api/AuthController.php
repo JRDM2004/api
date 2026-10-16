@@ -9,6 +9,7 @@ use App\Http\Resources\UsuarioResource;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -58,8 +59,17 @@ class AuthController extends Controller
      */
     public function cambiarNip(CambiarNipRequest $request): JsonResponse
     {
-        // * El cast "hashed" del modelo lo guarda con hash
-        $request->user()->update(['nip_hash' => $request->nip]);
+        $usuario = $request->user();
+        $tokenActual = $usuario->currentAccessToken();
+
+        // * Las dos cosas se guardan juntas: si una falla, no se guarda ninguna.
+        DB::transaction(function () use ($usuario, $request, $tokenActual) {
+            // * El cast "hashed" del modelo lo guarda con hash
+            $usuario->update(['nip_hash' => $request->nip]);
+
+            // * Cierra las demás sesiones; la de este dispositivo sigue abierta.
+            $usuario->tokens()->where('id', '!=', $tokenActual->id)->delete();
+        });
 
         return response()->json([
             'message' => 'NIP actualizado.',
