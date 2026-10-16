@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,6 +37,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => 'Tu sesión no es valida o expiro. Inicia sesión de nuevo.',
                 ], 401);
+            }
+        });
+
+        // * Cubre a un registro que no existe y a una ruta que no existe.
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => 'No se encontró el recurso.',
+                ], 404);
             }
         });
     })->create();

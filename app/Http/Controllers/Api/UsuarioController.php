@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Usuarios\ActualizarUsuarioRequest;
+use App\Http\Requests\Usuarios\CambiarEstadoUsuarioRequest;
 use App\Http\Requests\Usuarios\ConsultarUsuariosRequest;
 use App\Http\Requests\Usuarios\RegistrarUsuarioRequest;
 use App\Http\Resources\UsuarioResource;
@@ -68,5 +70,48 @@ class UsuarioController extends Controller
             'message' => 'Usuario registrado.',
             'user' => new UsuarioResource($usuario),
         ], 201);
+    }
+
+    /**
+     * Edita nombre, correo y rol. El número de cuenta no se cambia.
+     */
+    public function update(ActualizarUsuarioRequest $request, Usuario $usuario): JsonResponse
+    {
+        $usuario->update([
+            'nombre' => $request->nombre,
+            'correo' => $request->correo,
+            'rol' => $request->rol,
+        ]);
+
+        return response()->json([
+            'message' => 'Usuario actualizado.',
+            'user' => new UsuarioResource($usuario),
+        ]);
+    }
+
+    /**
+     * Activa o desactiva la cuenta. No borra nada de su historial.
+     */
+    public function cambiarEstado(CambiarEstadoUsuarioRequest $request, Usuario $usuario): JsonResponse
+    {
+        $activo = $request->boolean('activo');
+
+        $usuario->update(['activo' => $activo]);
+
+        // * Al desactivar se cierran todas sus sesiones abiertas.
+        if (! $activo) {
+            $usuario->tokens()->delete();
+        }
+
+        if ($activo) {
+            $mensaje = 'Usuario activado.';
+        } else {
+            $mensaje = 'Usuario desactivado.';
+        }
+
+        return response()->json([
+            'message' => $mensaje,
+            'user' => new UsuarioResource($usuario),
+        ]);
     }
 }
