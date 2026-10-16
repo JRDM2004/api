@@ -21,10 +21,18 @@ class ActualizarUsuarioRequest extends FormRequest
      */
     public function rules(): array
     {
+        // bail: si una regla falla, no revisa las demás y da un solo mensaje.
+        $reglasRol = ['bail', 'required', Rule::enum(Rol::class)];
+
+        // * Un administrador no puede quitarse a sí mismo el rol de administrador.
+        if ($this->route('usuario')->is($this->user())) {
+            $reglasRol[] = Rule::in([Rol::Administrador->value]);
+        }
+
         return [
             'nombre' => ['required', 'string', 'max:100'],
             'correo' => ['nullable', 'email', 'max:150'],
-            'rol' => ['required', Rule::enum(Rol::class)],
+            'rol' => $reglasRol,
         ];
     }
 
@@ -40,6 +48,7 @@ class ActualizarUsuarioRequest extends FormRequest
             'correo.max' => 'El correo no puede tener más de 150 caracteres.',
             'rol.required' => 'El rol es obligatorio.',
             'rol.enum' => 'El rol debe ser alumno, docente o administrador.',
+            'rol.in' => 'No puedes quitarte el rol de administrador.',
         ];
     }
 }

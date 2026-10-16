@@ -19,8 +19,16 @@ class CambiarEstadoUsuarioRequest extends FormRequest
      */
     public function rules(): array
     {
+        // bail: si una regla falla, no revisa las demás y da un solo mensaje.
+        $reglasActivo = ['bail', 'required', 'boolean'];
+
+        // * Un administrador no puede desactivar su propia cuenta.
+        if ($this->route('usuario')->is($this->user())) {
+            $reglasActivo[] = 'accepted';
+        }
+
         return [
-            'activo' => ['required', 'boolean'],
+            'activo' => $reglasActivo,
         ];
     }
 
@@ -32,6 +40,7 @@ class CambiarEstadoUsuarioRequest extends FormRequest
         return [
             'activo.required' => 'El estado es obligatorio.',
             'activo.boolean' => 'El estado debe ser true o false.',
+            'activo.accepted' => 'No puedes desactivar tu propia cuenta.',
         ];
     }
 }
