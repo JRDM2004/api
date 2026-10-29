@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Usuarios\ImportarUsuariosRequest;
 use App\Jobs\ProcesarImportacionUsuarios;
+use App\Models\Usuario;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 #[Group('Importaciones', weight: 3)]
@@ -58,6 +60,9 @@ class ImportacionUsuariosController extends Controller
     ])]
     public function show(string $id): JsonResponse
     {
+        // * No tiene Form Request, por eso el permiso se revisa aquí.
+        Gate::authorize('importar', Usuario::class);
+
         $importacion = Cache::get(ProcesarImportacionUsuarios::claveCache($id));
 
         // El reporte solo se guarda 24 horas.

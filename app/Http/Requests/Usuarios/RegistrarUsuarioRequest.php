@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Usuarios;
 
 use App\Enums\Rol;
+use App\Models\Usuario;
 use App\Rules\Nip;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,7 +13,7 @@ class RegistrarUsuarioRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Usuario::class);
     }
 
     /**

@@ -9,7 +9,7 @@ class CambiarEstadoUsuarioRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('cambiarEstado', $this->route('usuario'));
     }
 
     /**
