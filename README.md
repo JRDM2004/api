@@ -94,15 +94,7 @@ docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-**7. Generar la documentación de la API**
-
-```bash
-docker compose exec app php artisan l5-swagger:generate
-```
-
-La documentación no se guarda en el repositorio, por eso hay que generarla. Repite este paso cuando cambien los endpoints.
-
-**8. Comprobar que funciona**
+**7. Comprobar que funciona**
 
 ```bash
 curl http://localhost:8000/up
@@ -123,10 +115,18 @@ El paso 6 crea estos usuarios (solo para desarrollo):
 
 ## Documentación de la API
 
-Con los contenedores levantados, la documentación de todos los endpoints está en Swagger:
+La documentación la genera [Scramble](https://scramble.dedoc.co) a partir del código (rutas, Form Requests y API Resources), así que no hay que generarla a mano. Con los contenedores levantados está en:
 
 ```
-http://localhost:8000/api/documentation
+http://localhost:8000/docs/api
 ```
+
+Solo se muestra cuando `APP_ENV=local`; en los demás entornos responde 403. Para obtener el archivo OpenAPI (por ejemplo, para importarlo en Postman):
+
+```bash
+docker compose exec app php artisan scramble:export
+```
+
+Crea `api.json` en la raíz del proyecto.
 
 Para importar usuarios por CSV, consulta la [guía de importación](docs/usuarios/importar_usuarios.md).

@@ -3,15 +3,17 @@
 namespace App\Http\Requests\Usuarios;
 
 use App\Enums\Rol;
+use App\Models\Usuario;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class ConsultarUsuariosRequest extends FormRequest
 {
+    // * Se revisa antes de validar: quien no tiene permiso recibe 403, no los errores de los datos.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('viewAny', Usuario::class);
     }
 
     /**

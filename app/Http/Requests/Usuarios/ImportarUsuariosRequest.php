@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Usuarios;
 
+use App\Models\Usuario;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -11,7 +12,7 @@ class ImportarUsuariosRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('importar', Usuario::class);
     }
 
     /**

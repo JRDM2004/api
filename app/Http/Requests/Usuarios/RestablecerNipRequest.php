@@ -10,7 +10,7 @@ class RestablecerNipRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('restablecerNip', $this->route('usuario'));
     }
 
     /**

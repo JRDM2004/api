@@ -16,14 +16,17 @@ class CambiarNipRequest extends FormRequest
     /**
      * Pide el NIP actual, el nuevo y su confirmación (nip_confirmation).
      *
+     * current_password compara contra el nip_hash del usuario de la sesión.
+     * bail en nip: si una regla falla, no revisa las demás y da un solo mensaje.
+     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            // * current_password compara contra el nip_hash del usuario de la sesión
+            // El NIP con el que inicias sesión hoy.
             'nip_actual' => ['required', 'string', 'current_password'],
-            // bail: si una regla falla, no revisa las demás y da un solo mensaje.
+            // El NIP nuevo: de 4 a 6 letras o números, distinto al actual. Repítelo en nip_confirmation.
             'nip' => ['bail', 'required', new Nip, 'confirmed', 'different:nip_actual'],
         ];
     }
