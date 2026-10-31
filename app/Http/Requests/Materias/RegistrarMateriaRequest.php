@@ -18,12 +18,12 @@ class RegistrarMateriaRequest extends FormRequest
      */
     public function rules(): array
     {
-        // TODO: HU-11 T5 validar que el semestre exista y que la clave no se repita.
+        // bail en semestre_id: si no es un número, no se busca en la base de datos.
         return [
             // Id del semestre al que pertenece la materia.
-            'semestre_id' => ['required', 'integer'],
+            'semestre_id' => ['bail', 'required', 'integer', 'exists:semestres,id'],
             // Clave de la materia en el plan de estudios. No se puede repetir.
-            'clave' => ['required', 'string', 'max:20'],
+            'clave' => ['required', 'string', 'max:20', 'unique:materias,clave'],
             'nombre' => ['required', 'string', 'max:150'],
         ];
     }
@@ -36,8 +36,10 @@ class RegistrarMateriaRequest extends FormRequest
         return [
             'semestre_id.required' => 'El semestre es obligatorio.',
             'semestre_id.integer' => 'El semestre no es válido.',
+            'semestre_id.exists' => 'El semestre no existe.',
             'clave.required' => 'La clave es obligatoria.',
             'clave.max' => 'La clave no puede tener más de 20 caracteres.',
+            'clave.unique' => 'Ya existe una materia con esa clave.',
             'nombre.required' => 'El nombre es obligatorio.',
             'nombre.max' => 'El nombre no puede tener más de 150 caracteres.',
         ];
