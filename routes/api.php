@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ImportacionUsuariosController;
+use App\Http\Controllers\Api\MateriaController;
 use App\Http\Controllers\Api\SemestreController;
 use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Support\Facades\Route;
@@ -24,4 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // * Materias por semestre: el permiso de administrador llega con MateriaPolicy (HU-11 T6).
     Route::get('/semestres', [SemestreController::class, 'index']);
+    Route::post('/materias', [MateriaController::class, 'store']);
+    Route::put('/materias/{materia}', [MateriaController::class, 'update']);
+    Route::patch('/materias/{materia}/estado', [MateriaController::class, 'cambiarEstado']);
 });
