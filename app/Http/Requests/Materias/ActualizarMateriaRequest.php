@@ -8,10 +8,9 @@ use Illuminate\Validation\Rule;
 
 class ActualizarMateriaRequest extends FormRequest
 {
-    // TODO: HU-11 T6 revisar con MateriaPolicy que solo el administrador pueda editar.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('update', $this->route('materia'));
     }
 
     /**

@@ -23,7 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/usuarios/importaciones', [ImportacionUsuariosController::class, 'store']);
     Route::get('/usuarios/importaciones/{id}', [ImportacionUsuariosController::class, 'show']);
 
-    // * Materias por semestre: el permiso de administrador llega con MateriaPolicy (HU-11 T6).
+    // * Materias por semestre: los permisos los decide MateriaPolicy.
     Route::get('/semestres', [SemestreController::class, 'index']);
     Route::post('/materias', [MateriaController::class, 'store']);
     Route::put('/materias/{materia}', [MateriaController::class, 'update']);

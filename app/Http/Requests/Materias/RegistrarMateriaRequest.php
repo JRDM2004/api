@@ -2,15 +2,15 @@
 
 namespace App\Http\Requests\Materias;
 
+use App\Models\Materia;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegistrarMateriaRequest extends FormRequest
 {
-    // TODO: HU-11 T6 revisar con MateriaPolicy que solo el administrador pueda registrar.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Materia::class);
     }
 
     /**

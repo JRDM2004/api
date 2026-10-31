@@ -2,15 +2,16 @@
 
 namespace App\Http\Requests\Semestres;
 
+use App\Models\Materia;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ConsultarSemestresRequest extends FormRequest
 {
-    // TODO: HU-11 T6 revisar con MateriaPolicy que solo el administrador pueda consultar.
+    // * Lo que se consulta son las materias, por eso el permiso es de MateriaPolicy.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('viewAny', Materia::class);
     }
 
     /**

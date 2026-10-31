@@ -7,10 +7,9 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CambiarEstadoMateriaRequest extends FormRequest
 {
-    // TODO: HU-11 T6 revisar con MateriaPolicy que solo el administrador pueda cambiar el estado.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('cambiarEstado', $this->route('materia'));
     }
 
     /**
