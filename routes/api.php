@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ImportacionUsuariosController;
+use App\Http\Controllers\Api\MateriaController;
+use App\Http\Controllers\Api\SemestreController;
 use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,4 +22,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/usuarios/{usuario}/restablecer-nip', [UsuarioController::class, 'restablecerNip']);
     Route::post('/usuarios/importaciones', [ImportacionUsuariosController::class, 'store']);
     Route::get('/usuarios/importaciones/{id}', [ImportacionUsuariosController::class, 'show']);
+
+    // * Materias por semestre: los permisos los decide MateriaPolicy.
+    Route::get('/semestres', [SemestreController::class, 'index']);
+    Route::post('/materias', [MateriaController::class, 'store']);
+    Route::put('/materias/{materia}', [MateriaController::class, 'update']);
+    Route::patch('/materias/{materia}/estado', [MateriaController::class, 'cambiarEstado']);
 });
