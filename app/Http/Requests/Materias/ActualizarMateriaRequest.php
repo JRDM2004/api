@@ -20,7 +20,7 @@ class ActualizarMateriaRequest extends FormRequest
      */
     public function rules(): array
     {
-        // TODO: HU-15 una materia con cursos no puede cambiar de semestre.
+        // TODO: HU-13 una materia con cursos no puede cambiar de semestre.
         // bail en semestre_id: si no es un número, no se busca en la base de datos.
         return [
             // Id del semestre al que pertenece la materia.
