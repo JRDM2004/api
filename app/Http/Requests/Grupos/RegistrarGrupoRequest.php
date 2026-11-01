@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Grupos;
 
+use App\Enums\Turno;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegistrarGrupoRequest extends FormRequest
 {
@@ -18,14 +20,14 @@ class RegistrarGrupoRequest extends FormRequest
      */
     public function rules(): array
     {
-        // TODO: HU-11 T3 validar que el semestre exista, que el nombre no se repita y que el turno sea válido.
+        // bail en semestre_id: si no es un número, no se busca en la base de datos.
         return [
             // Id del semestre que cursa el grupo.
-            'semestre_id' => ['required', 'integer'],
+            'semestre_id' => ['bail', 'required', 'integer', 'exists:semestres,id'],
             // Nombre del grupo, por ejemplo 3-2. No se puede repetir.
-            'nombre' => ['required', 'string', 'max:20'],
+            'nombre' => ['required', 'string', 'max:20', 'unique:grupos,nombre'],
             // matutino o vespertino. Es opcional.
-            'turno' => ['nullable', 'string'],
+            'turno' => ['nullable', Rule::enum(Turno::class)],
         ];
     }
 
@@ -37,8 +39,11 @@ class RegistrarGrupoRequest extends FormRequest
         return [
             'semestre_id.required' => 'El semestre es obligatorio.',
             'semestre_id.integer' => 'El semestre no es válido.',
+            'semestre_id.exists' => 'El semestre no existe.',
             'nombre.required' => 'El nombre es obligatorio.',
             'nombre.max' => 'El nombre no puede tener más de 20 caracteres.',
+            'nombre.unique' => 'Ya existe un grupo con ese nombre.',
+            'turno.enum' => 'El turno debe ser matutino o vespertino.',
         ];
     }
 }
