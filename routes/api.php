@@ -40,6 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/grupos/{grupo}/alumnos', [GrupoAlumnoController::class, 'store']);
     Route::patch('/grupos/{grupo}/alumnos/{alumno}', [GrupoAlumnoController::class, 'cambiarEstado']);
 
-    // * Cursos: el permiso de administrador llega con CursoPolicy (HU-13 T7).
+    // * Cursos: los permisos los decide CursoPolicy.
     Route::post('/cursos', [CursoController::class, 'store']);
 });

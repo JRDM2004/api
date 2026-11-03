@@ -13,10 +13,9 @@ use Illuminate\Validation\Validator;
 
 class RegistrarCursoRequest extends FormRequest
 {
-    // TODO: HU-13 T7 revisar con CursoPolicy que solo el administrador pueda registrar.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Curso::class);
     }
 
     /**
