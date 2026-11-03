@@ -6,15 +6,63 @@ use App\Enums\EstadoGrupoAlumno;
 use App\Enums\Rol;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Grupos\AgregarAlumnosRequest;
+use App\Http\Requests\Grupos\ConsultarAlumnosGrupoRequest;
+use App\Http\Resources\GrupoAlumnoResource;
 use App\Models\Grupo;
 use App\Models\GrupoAlumno;
 use App\Models\Usuario;
 use Dedoc\Scramble\Attributes\Group;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 #[Group('Grupos', weight: 4)]
 class GrupoAlumnoController extends Controller
 {
+    public const ALUMNOS_POR_PAGINA = 15;
+
+    /**
+     * Listar los alumnos de un grupo
+     *
+     * Paginada de 15 en 15 y ordenada por nombre. Por defecto solo salen los
+     * activos. Acepta en la URL: buscar (parte del número de cuenta o del
+     * nombre) e incluir_bajas (para ver también a los dados de baja).
+     */
+    // * La paginación no la detecta sola la documentación, por eso se declara "page".
+    #[QueryParameter('page', 'Número de página.', type: 'int', default: 1)]
+    public function index(ConsultarAlumnosGrupoRequest $request, Grupo $grupo): AnonymousResourceCollection
+    {
+        // El join permite buscar y ordenar por los datos del alumno.
+        $consulta = GrupoAlumno::query()
+            ->join('usuarios', 'usuarios.id', '=', 'grupo_alumnos.alumno_id')
+            ->select('grupo_alumnos.*')
+            ->where('grupo_alumnos.grupo_id', $grupo->id)
+            ->with('alumno');
+
+        if (! $request->boolean('incluir_bajas')) {
+            $consulta->where('grupo_alumnos.estado', EstadoGrupoAlumno::Activo);
+        }
+
+        if ($request->filled('buscar')) {
+            $texto = '%'.$request->buscar.'%';
+
+            $consulta->where(function ($condicion) use ($texto) {
+                $condicion->whereLike('usuarios.numero_cuenta', $texto)
+                    ->orWhereLike('usuarios.nombre', $texto);
+            });
+        }
+
+        // El id desempata a los alumnos con el mismo nombre para que no cambien de página.
+        $alumnos = $consulta->orderBy('usuarios.nombre')
+            ->orderBy('grupo_alumnos.id')
+            ->paginate(self::ALUMNOS_POR_PAGINA);
+
+        // Los enlaces de las otras páginas conservan la búsqueda y el filtro.
+        $alumnos->withQueryString();
+
+        return GrupoAlumnoResource::collection($alumnos);
+    }
+
     /**
      * Agregar alumnos a un grupo
      *
