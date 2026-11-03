@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\EstadoGrupoAlumno;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -31,6 +32,18 @@ class GrupoAlumno extends Model
             'estado' => EstadoGrupoAlumno::class,
             'baja_en' => 'datetime',
         ];
+    }
+
+    /**
+     * Deja solo a los alumnos activos. Toda consulta de "los alumnos del grupo"
+     * debe usarlo, para que los dados de baja no salgan ni entren a los cursos.
+     *
+     * @param  Builder<GrupoAlumno>  $query
+     */
+    public function scopeActivos(Builder $query): void
+    {
+        // Con el nombre de la tabla sigue funcionando cuando la consulta lleva un join.
+        $query->where('grupo_alumnos.estado', EstadoGrupoAlumno::Activo);
     }
 
     /**

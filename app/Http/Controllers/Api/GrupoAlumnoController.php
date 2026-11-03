@@ -42,7 +42,7 @@ class GrupoAlumnoController extends Controller
             ->with('alumno');
 
         if (! $request->boolean('incluir_bajas')) {
-            $consulta->where('grupo_alumnos.estado', EstadoGrupoAlumno::Activo);
+            $consulta->activos();
         }
 
         if ($request->filled('buscar')) {
@@ -183,8 +183,8 @@ class GrupoAlumnoController extends Controller
         }
 
         // * Un alumno solo puede estar activo en un grupo a la vez.
-        $filaEnOtroGrupo = GrupoAlumno::where('alumno_id', $usuario->id)
-            ->where('estado', EstadoGrupoAlumno::Activo)
+        $filaEnOtroGrupo = GrupoAlumno::activos()
+            ->where('alumno_id', $usuario->id)
             ->where('grupo_id', '!=', $grupo->id)
             ->first();
 
