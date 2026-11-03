@@ -9,10 +9,9 @@ use Illuminate\Validation\Rule;
 
 class ActualizarGrupoRequest extends FormRequest
 {
-    // TODO: HU-11 T4 revisar con GrupoPolicy que solo el administrador pueda editar.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('update', $this->route('grupo'));
     }
 
     /**

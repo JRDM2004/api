@@ -30,7 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/materias/{materia}', [MateriaController::class, 'update']);
     Route::patch('/materias/{materia}/estado', [MateriaController::class, 'cambiarEstado']);
 
-    // * Grupos: el permiso de administrador llega con GrupoPolicy (HU-11 T4).
+    // * Grupos: los permisos los decide GrupoPolicy.
     Route::get('/grupos', [GrupoController::class, 'index']);
     Route::post('/grupos', [GrupoController::class, 'store']);
     Route::put('/grupos/{grupo}', [GrupoController::class, 'update']);

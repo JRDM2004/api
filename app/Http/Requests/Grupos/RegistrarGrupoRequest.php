@@ -3,16 +3,16 @@
 namespace App\Http\Requests\Grupos;
 
 use App\Enums\Turno;
+use App\Models\Grupo;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class RegistrarGrupoRequest extends FormRequest
 {
-    // TODO: HU-11 T4 revisar con GrupoPolicy que solo el administrador pueda registrar.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Grupo::class);
     }
 
     /**

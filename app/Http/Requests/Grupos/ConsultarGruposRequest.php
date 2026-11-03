@@ -2,15 +2,15 @@
 
 namespace App\Http\Requests\Grupos;
 
+use App\Models\Grupo;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ConsultarGruposRequest extends FormRequest
 {
-    // TODO: HU-11 T4 revisar con GrupoPolicy que solo el administrador pueda consultar.
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('viewAny', Grupo::class);
     }
 
     /**
