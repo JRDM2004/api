@@ -6,6 +6,7 @@ use App\Enums\Turno;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class ActualizarGrupoRequest extends FormRequest
 {
@@ -21,7 +22,6 @@ class ActualizarGrupoRequest extends FormRequest
      */
     public function rules(): array
     {
-        // TODO: HU-13 un grupo con cursos no puede cambiar de semestre.
         // bail en semestre_id: si no es un número, no se busca en la base de datos.
         return [
             // Id del semestre que cursa el grupo.
@@ -31,6 +31,31 @@ class ActualizarGrupoRequest extends FormRequest
             'nombre' => ['required', 'string', 'max:20', Rule::unique('grupos', 'nombre')->ignore($this->route('grupo'))],
             // matutino o vespertino. Mandarlo en null quita el turno.
             'turno' => ['nullable', Rule::enum(Turno::class)],
+        ];
+    }
+
+    /**
+     * Reglas que necesitan consultar otros datos. Solo corren si los campos ya son válidos.
+     *
+     * @return array<int, callable>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                $grupo = $this->route('grupo');
+                // (int) porque la validación también acepta "5" como texto.
+                $cambiaDeSemestre = (int) $this->semestre_id !== $grupo->semestre_id;
+
+                // * Sus cursos dejarían de coincidir con el semestre de sus materias.
+                if ($cambiaDeSemestre && $grupo->cursos()->exists()) {
+                    $validator->errors()->add('semestre_id', 'El grupo tiene cursos: no puede cambiar de semestre.');
+                }
+            },
         ];
     }
 

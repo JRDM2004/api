@@ -5,6 +5,7 @@ namespace App\Http\Requests\Materias;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class ActualizarMateriaRequest extends FormRequest
 {
@@ -20,7 +21,6 @@ class ActualizarMateriaRequest extends FormRequest
      */
     public function rules(): array
     {
-        // TODO: HU-13 una materia con cursos no puede cambiar de semestre.
         // bail en semestre_id: si no es un número, no se busca en la base de datos.
         return [
             // Id del semestre al que pertenece la materia.
@@ -29,6 +29,31 @@ class ActualizarMateriaRequest extends FormRequest
             // * ignore(): la materia puede conservar su propia clave al editarse.
             'clave' => ['required', 'string', 'max:20', Rule::unique('materias', 'clave')->ignore($this->route('materia'))],
             'nombre' => ['required', 'string', 'max:150'],
+        ];
+    }
+
+    /**
+     * Reglas que necesitan consultar otros datos. Solo corren si los campos ya son válidos.
+     *
+     * @return array<int, callable>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                $materia = $this->route('materia');
+                // (int) porque la validación también acepta "5" como texto.
+                $cambiaDeSemestre = (int) $this->semestre_id !== $materia->semestre_id;
+
+                // * Sus cursos dejarían de coincidir con el semestre de su grupo.
+                if ($cambiaDeSemestre && $materia->cursos()->exists()) {
+                    $validator->errors()->add('semestre_id', 'La materia tiene cursos: no puede cambiar de semestre.');
+                }
+            },
         ];
     }
 

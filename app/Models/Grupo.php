@@ -43,4 +43,12 @@ class Grupo extends Model
     {
         return $this->hasMany(GrupoAlumno::class);
     }
+
+    /**
+     * @return HasMany<Curso, $this>
+     */
+    public function cursos(): HasMany
+    {
+        return $this->hasMany(Curso::class);
+    }
 }
