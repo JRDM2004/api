@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GrupoAlumnoController;
 use App\Http\Controllers\Api\GrupoController;
 use App\Http\Controllers\Api\ImportacionUsuariosController;
 use App\Http\Controllers\Api\MateriaController;
@@ -34,4 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/grupos', [GrupoController::class, 'index']);
     Route::post('/grupos', [GrupoController::class, 'store']);
     Route::put('/grupos/{grupo}', [GrupoController::class, 'update']);
+    Route::get('/grupos/{grupo}/alumnos', [GrupoAlumnoController::class, 'index']);
+    Route::post('/grupos/{grupo}/alumnos', [GrupoAlumnoController::class, 'store']);
+    Route::patch('/grupos/{grupo}/alumnos/{alumno}', [GrupoAlumnoController::class, 'cambiarEstado']);
 });

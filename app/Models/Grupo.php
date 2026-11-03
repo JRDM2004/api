@@ -6,6 +6,7 @@ use App\Enums\Turno;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Un grupo (salón) que cursa un semestre.
@@ -33,5 +34,13 @@ class Grupo extends Model
     public function semestre(): BelongsTo
     {
         return $this->belongsTo(Semestre::class);
+    }
+
+    /**
+     * @return HasMany<GrupoAlumno, $this>
+     */
+    public function grupoAlumnos(): HasMany
+    {
+        return $this->hasMany(GrupoAlumno::class);
     }
 }
