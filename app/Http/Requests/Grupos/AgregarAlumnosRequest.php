@@ -17,7 +17,7 @@ class AgregarAlumnosRequest extends FormRequest
      */
     public function rules(): array
     {
-        // TODO: HU-12 T3 validar el rol, que esté activo y que no esté activo en otro grupo.
+        // El rol, el estado y el otro grupo se revisan en el controlador: esos alumnos se omiten, no rechazan la lista.
         // bail en cada id: si no es un número, no se busca en la base de datos.
         return [
             // Ids de los alumnos que se agregan al grupo, de 1 a 100 por petición.
