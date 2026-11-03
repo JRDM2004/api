@@ -38,8 +38,8 @@ class MateriaController extends Controller
     /**
      * Editar una materia
      *
-     * Cambia semestre, clave y nombre. El estado no se cambia aquí: se usa
-     * el endpoint de estado.
+     * Cambia semestre, clave y nombre. Una materia con cursos no puede cambiar
+     * de semestre. El estado no se cambia aquí: se usa el endpoint de estado.
      */
     public function update(ActualizarMateriaRequest $request, Materia $materia): JsonResponse
     {
