@@ -24,4 +24,12 @@ class Semestre extends Model
     {
         return $this->hasMany(Materia::class);
     }
+
+    /**
+     * @return HasMany<Grupo, $this>
+     */
+    public function grupos(): HasMany
+    {
+        return $this->hasMany(Grupo::class);
+    }
 }

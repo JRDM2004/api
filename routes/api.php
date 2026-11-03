@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GrupoController;
 use App\Http\Controllers\Api\ImportacionUsuariosController;
 use App\Http\Controllers\Api\MateriaController;
 use App\Http\Controllers\Api\SemestreController;
@@ -28,4 +29,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/materias', [MateriaController::class, 'store']);
     Route::put('/materias/{materia}', [MateriaController::class, 'update']);
     Route::patch('/materias/{materia}/estado', [MateriaController::class, 'cambiarEstado']);
+
+    // * Grupos: los permisos los decide GrupoPolicy.
+    Route::get('/grupos', [GrupoController::class, 'index']);
+    Route::post('/grupos', [GrupoController::class, 'store']);
+    Route::put('/grupos/{grupo}', [GrupoController::class, 'update']);
 });
