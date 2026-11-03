@@ -63,7 +63,8 @@ class GrupoController extends Controller
     /**
      * Editar un grupo
      *
-     * Cambia semestre, nombre y turno. Mandar el turno en null lo quita.
+     * Cambia semestre, nombre y turno. Mandar el turno en null lo quita. Un
+     * grupo con cursos no puede cambiar de semestre.
      */
     public function update(ActualizarGrupoRequest $request, Grupo $grupo): JsonResponse
     {
