@@ -21,26 +21,39 @@ class GrupoAlumnoController extends Controller
      * Recibe una lista de ids. Solo se agregan usuarios activos con rol alumno
      * que no estén activos en otro grupo; los demás se omiten sin detener al
      * resto. Un alumno dado de baja de este grupo vuelve a quedar activo.
+     * Responde con los ids agregados y con los omitidos y su motivo.
      */
     public function store(AgregarAlumnosRequest $request, Grupo $grupo): JsonResponse
     {
-        // TODO: HU-12 T4 devolver también los omitidos y el motivo.
         $agregados = [];
+        $omitidos = [];
 
-        foreach ($request->alumno_ids as $alumnoId) {
+        foreach ($request->alumno_ids as $idRecibido) {
+            // La validación también acepta "5" como texto; la respuesta siempre devuelve números.
+            $alumnoId = (int) $idRecibido;
             $usuario = Usuario::find($alumnoId);
 
-            if ($usuario->rol !== Rol::Alumno || ! $usuario->activo) {
+            if ($usuario->rol !== Rol::Alumno) {
+                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => 'No tiene rol de alumno.'];
+
+                continue;
+            }
+
+            if (! $usuario->activo) {
+                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => 'Su cuenta no está activa.'];
+
                 continue;
             }
 
             // * Un alumno solo puede estar activo en un grupo a la vez.
-            $activoEnOtroGrupo = GrupoAlumno::where('alumno_id', $alumnoId)
+            $filaEnOtroGrupo = GrupoAlumno::where('alumno_id', $alumnoId)
                 ->where('estado', EstadoGrupoAlumno::Activo)
                 ->where('grupo_id', '!=', $grupo->id)
-                ->exists();
+                ->first();
 
-            if ($activoEnOtroGrupo) {
+            if ($filaEnOtroGrupo !== null) {
+                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => 'Ya está activo en el grupo '.$filaEnOtroGrupo->grupo->nombre.'.'];
+
                 continue;
             }
 
@@ -61,12 +74,15 @@ class GrupoAlumnoController extends Controller
                     'baja_en' => null,
                 ]);
                 $agregados[] = $alumnoId;
+            } else {
+                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => 'Ya está en este grupo.'];
             }
         }
 
         return response()->json([
             'message' => 'Alumnos procesados.',
             'agregados' => $agregados,
+            'omitidos' => $omitidos,
         ]);
     }
 }
