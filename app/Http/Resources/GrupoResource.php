@@ -25,6 +25,8 @@ class GrupoResource extends JsonResource
             'semestre' => new SemestreResource($this->whenLoaded('semestre')),
             // Solo sale en la lista de grupos, que es donde se cuenta.
             'alumnos_activos' => $this->whenCounted('alumnos_activos'),
+            // Solo sale en la lista de grupos, que es donde se cuenta.
+            'total_cursos' => $this->whenCounted('cursos'),
         ];
     }
 }
