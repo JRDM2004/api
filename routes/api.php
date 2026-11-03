@@ -37,4 +37,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/grupos/{grupo}', [GrupoController::class, 'update']);
     Route::get('/grupos/{grupo}/alumnos', [GrupoAlumnoController::class, 'index']);
     Route::post('/grupos/{grupo}/alumnos', [GrupoAlumnoController::class, 'store']);
+    Route::patch('/grupos/{grupo}/alumnos/{alumno}', [GrupoAlumnoController::class, 'cambiarEstado']);
 });

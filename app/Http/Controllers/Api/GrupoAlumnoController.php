@@ -6,6 +6,7 @@ use App\Enums\EstadoGrupoAlumno;
 use App\Enums\Rol;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Grupos\AgregarAlumnosRequest;
+use App\Http\Requests\Grupos\CambiarEstadoAlumnoRequest;
 use App\Http\Requests\Grupos\ConsultarAlumnosGrupoRequest;
 use App\Http\Resources\GrupoAlumnoResource;
 use App\Models\Grupo;
@@ -15,6 +16,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\ValidationException;
 
 #[Group('Grupos', weight: 4)]
 class GrupoAlumnoController extends Controller
@@ -81,26 +83,10 @@ class GrupoAlumnoController extends Controller
             $alumnoId = (int) $idRecibido;
             $usuario = Usuario::find($alumnoId);
 
-            if ($usuario->rol !== Rol::Alumno) {
-                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => 'No tiene rol de alumno.'];
+            $motivo = $this->motivoParaNoActivar($usuario, $grupo);
 
-                continue;
-            }
-
-            if (! $usuario->activo) {
-                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => 'Su cuenta no está activa.'];
-
-                continue;
-            }
-
-            // * Un alumno solo puede estar activo en un grupo a la vez.
-            $filaEnOtroGrupo = GrupoAlumno::where('alumno_id', $alumnoId)
-                ->where('estado', EstadoGrupoAlumno::Activo)
-                ->where('grupo_id', '!=', $grupo->id)
-                ->first();
-
-            if ($filaEnOtroGrupo !== null) {
-                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => 'Ya está activo en el grupo '.$filaEnOtroGrupo->grupo->nombre.'.'];
+            if ($motivo !== null) {
+                $omitidos[] = ['alumno_id' => $alumnoId, 'motivo' => $motivo];
 
                 continue;
             }
@@ -132,5 +118,80 @@ class GrupoAlumnoController extends Controller
             'agregados' => $agregados,
             'omitidos' => $omitidos,
         ]);
+    }
+
+    /**
+     * Dar de baja o reingresar a un alumno del grupo
+     *
+     * estado en baja lo da de baja sin borrar nada; en activo lo reingresa, si
+     * sigue siendo un alumno activo y no está activo en otro grupo. Si ya
+     * estaba en ese estado no cambia nada. El alumno debe pertenecer al grupo.
+     */
+    public function cambiarEstado(CambiarEstadoAlumnoRequest $request, Grupo $grupo, Usuario $alumno): JsonResponse
+    {
+        $fila = GrupoAlumno::where('grupo_id', $grupo->id)
+            ->where('alumno_id', $alumno->id)
+            ->firstOrFail();
+
+        $estadoNuevo = $request->enum('estado', EstadoGrupoAlumno::class);
+
+        if ($estadoNuevo === EstadoGrupoAlumno::Baja) {
+            // * Solo se marca una vez, para conservar la fecha de la primera baja.
+            if ($fila->estado === EstadoGrupoAlumno::Activo) {
+                $fila->update([
+                    'estado' => EstadoGrupoAlumno::Baja,
+                    'baja_en' => now(),
+                ]);
+            }
+
+            $mensaje = 'Alumno dado de baja.';
+        } else {
+            if ($fila->estado === EstadoGrupoAlumno::Baja) {
+                $motivo = $this->motivoParaNoActivar($alumno, $grupo);
+
+                if ($motivo !== null) {
+                    throw ValidationException::withMessages(['estado' => [$motivo]]);
+                }
+
+                $fila->update([
+                    'estado' => EstadoGrupoAlumno::Activo,
+                    'baja_en' => null,
+                ]);
+            }
+
+            $mensaje = 'Alumno reingresado.';
+        }
+
+        return response()->json([
+            'message' => $mensaje,
+            'alumno' => new GrupoAlumnoResource($fila),
+        ]);
+    }
+
+    /**
+     * Dice por qué un usuario no puede quedar activo en el grupo, o null si sí puede.
+     * Agregar y reingresar usan las mismas reglas.
+     */
+    private function motivoParaNoActivar(Usuario $usuario, Grupo $grupo): ?string
+    {
+        if ($usuario->rol !== Rol::Alumno) {
+            return 'No tiene rol de alumno.';
+        }
+
+        if (! $usuario->activo) {
+            return 'Su cuenta no está activa.';
+        }
+
+        // * Un alumno solo puede estar activo en un grupo a la vez.
+        $filaEnOtroGrupo = GrupoAlumno::where('alumno_id', $usuario->id)
+            ->where('estado', EstadoGrupoAlumno::Activo)
+            ->where('grupo_id', '!=', $grupo->id)
+            ->first();
+
+        if ($filaEnOtroGrupo !== null) {
+            return 'Ya está activo en el grupo '.$filaEnOtroGrupo->grupo->nombre.'.';
+        }
+
+        return null;
     }
 }
