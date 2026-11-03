@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests\Cursos;
 
+use App\Enums\Rol;
 use App\Models\Curso;
+use App\Models\Grupo;
+use App\Models\Materia;
+use App\Models\Usuario;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -44,7 +48,28 @@ class RegistrarCursoRequest extends FormRequest
                     return;
                 }
 
-                // TODO: HU-13 T3 validar el semestre de la materia y el rol del docente.
+                $materia = Materia::find($this->materia_id);
+                $grupo = Grupo::find($this->grupo_id);
+
+                if (! $materia->activa) {
+                    $validator->errors()->add('materia_id', 'La materia no está activa.');
+                }
+
+                // * Un grupo solo cursa materias de su propio semestre.
+                if ($materia->semestre_id !== $grupo->semestre_id) {
+                    $validator->errors()->add('materia_id', 'La materia no pertenece al semestre del grupo.');
+                }
+
+                if ($this->filled('docente_id')) {
+                    $docente = Usuario::find($this->docente_id);
+
+                    if ($docente->rol !== Rol::Docente) {
+                        $validator->errors()->add('docente_id', 'El usuario no tiene rol de docente.');
+                    } elseif (! $docente->activo) {
+                        $validator->errors()->add('docente_id', 'El docente no está activo.');
+                    }
+                }
+
                 $yaExiste = Curso::where('materia_id', $this->materia_id)
                     ->where('grupo_id', $this->grupo_id)
                     ->exists();
