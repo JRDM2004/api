@@ -29,6 +29,12 @@ class GrupoPolicy
         return $this->esAdministrador($actor);
     }
 
+    // * Agregar, listar y dar de baja a los alumnos de un grupo usan este permiso.
+    public function gestionarAlumnos(Usuario $actor, Grupo $grupo): bool
+    {
+        return $this->esAdministrador($actor);
+    }
+
     private function esAdministrador(Usuario $actor): bool
     {
         return $actor->rol === Rol::Administrador;
