@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CursoController;
 use App\Http\Controllers\Api\GrupoAlumnoController;
 use App\Http\Controllers\Api\GrupoController;
 use App\Http\Controllers\Api\ImportacionUsuariosController;
@@ -38,4 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/grupos/{grupo}/alumnos', [GrupoAlumnoController::class, 'index']);
     Route::post('/grupos/{grupo}/alumnos', [GrupoAlumnoController::class, 'store']);
     Route::patch('/grupos/{grupo}/alumnos/{alumno}', [GrupoAlumnoController::class, 'cambiarEstado']);
+
+    // * Cursos: el permiso de administrador llega con CursoPolicy (HU-13 T7).
+    Route::post('/cursos', [CursoController::class, 'store']);
 });
